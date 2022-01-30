@@ -18,7 +18,7 @@ We chose an external measurement as they are easier to interpreter than the inte
 After investigating various learning rate functions suggested by W. Natita et. al.[2], we used the following learning 
 rate functions in addition to the default function:
 
-$$1. \alpha(t) = \alpha(0) \times \frac{1}{t}$$
+$$ 1. \alpha(t) = \alpha(0) \times \frac{1}{t} $$
 
 $$2. \alpha(t,T) = \alpha(0) \times (1 - \frac{t}{T})$$
 
