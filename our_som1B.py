@@ -51,7 +51,7 @@ class SOM:
     def initialize(self):
         self.net = np.random.random((self.network_dimensions[0], self.network_dimensions[1], self.num_features))
 
-    def train(self, data, function, q = 1, p = 2, num_epochs=100, init_learning_rate=0.01, resetWeights=False):
+    def train(self, data,function, num_epochs=100, init_learning_rate=0.01, resetWeights=False):
         """
         :param data: the data to be trained
         :param num_epochs: number of epochs (default: 100)
@@ -72,7 +72,7 @@ class SOM:
         # for (epoch = 1,..., Nepochs)
         for i in range(1, num_epochs + 1):
             # interpolate new values for α(t) and σ (t)
-            radius = self.decay_radius(i)
+            radius = self.decay_radius(i, function)
             learning_rate = self.decay_learning_rate(init_learning_rate, i, num_epochs)
             # visualization
             vis_interval = int(num_epochs/10)
@@ -83,8 +83,8 @@ class SOM:
             #     print("neighborhood radius ", radius)
             #     print("learning rate ", learning_rate)
             #     print("-------------------------------------")
-
-            # shuffling data
+            #
+            # # shuffling data
             np.random.shuffle(indices)
 
             # for (record = 1,..., Nrecords)
@@ -100,20 +100,16 @@ class SOM:
                         w_dist = np.sum((np.array([x, y]) - bmu_idx) ** 2)
                         # if the distance is within the current neighbourhood radius
                         if w_dist <= radius ** 2:
-                            # update weight vectors wk using Eq. (3m )
-                            influence = SOM.calculate_influence(w_dist, radius, function, q, p)
+                            # update weight vectors wk using Eq. (3)
+                            influence = SOM.calculate_influence(w_dist, radius)
                             new_w = weight + (learning_rate * influence * (row_t - weight))
                             self.net[x, y, :] = new_w.reshape(1, self.num_features)
         if fig is not None:
             plt.show()
 
     @staticmethod
-    def calculate_influence(distance, radius, function, q, p):
-        if function == "gaussian":
-            return np.exp(-q * distance / (2 * (radius ** p)))
-        elif function == "mexican_hat":
-            return  (1 - distance / (radius ** 2)) * np.exp(- distance / (2 * (radius ** 2)))
-
+    def calculate_influence(distance, radius): #distribution
+        return np.exp(-distance / (2 * (radius ** 2)))#SD - 2 * r**2
 
     def find_bmu(self, row_t):
         """
@@ -144,8 +140,13 @@ class SOM:
         bmu, bmu_idx = self.find_bmu(data)
         return bmu, bmu_idx
 
-    def decay_radius(self, iteration):
-        return self.init_radius * np.exp(-iteration / self.time_constant)#rk-rx^2
+    def decay_radius(self, iteration, function):
+        if function == "none":
+            return self.init_radius
+        elif function == "dynamic":
+            return self.init_radius * np.exp(-iteration / self.time_constant)
+        elif function == "fixed":
+            return self.init_radius * 0.5
 
     def decay_learning_rate(self, initial_learning_rate, iteration, num_iterations):
         return initial_learning_rate * np.exp(-iteration / num_iterations)

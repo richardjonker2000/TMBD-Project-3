@@ -46,6 +46,12 @@ http://www.cis.hut.fi/somtoolbox/documentation/somalg.shtml
 
 ## Question 3
 
+We interpreted the curve of distribution as being the radius of the neighbourhood function. We investigated the use of 
+removing the decreasing radius function, and also providing a fixed decreasing radius value of 0.5. We were not able to 
+find substitutes to this function. all the tests were run with 40 epochs as this shows the best variation in the data. 
+It was interesting to note the fixed decreasing radius had better results in 60 epochs than the dynamic decreasing radius.
+Not changing the radius performed badly as expected.
+
 ## Question 4
 We interpreted the normal distribution as the neighborhood function $h_{ck}(t)$. After investigating we found various 
 possible neighborhood functions namely gaussian(the default one), bubble[2], mexican-hat[3] and triangular neighborhood.
