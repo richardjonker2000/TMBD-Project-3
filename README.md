@@ -42,6 +42,35 @@ From this we can see that improvements are not really obtainable by using differ
 some of them perform worse. 
 
 
+http://www.cis.hut.fi/somtoolbox/documentation/somalg.shtml
+
+## Question 3
+We interpreted the curve of deviation as the neighborhood function $h_{ck}(t)$. After investigating we found various 
+possible neighborhood functions namely gaussian(the default one), bubble[2], mexican-hat[3] and triangular neighborhood.
+We selected the mexican-hat neighborhood function as we were not able to understand how to implement the simple bubble 
+function. The mexican-hat function is defined as [3]:
+
+$$h_{ck}(t) =(1-2\frac{||r_k-r_c||^2}{\sigma(t)^2}) \times e^{-\frac{||r_k-r_c||^2}{\sigma(t)^2}}$$
+
+With $x$ and $c$ representing an input pattern and centre, and width being $2w$. 
+
+We also decided to investigate some changes to the gaussian neighbourhood function[4]:
+
+$$h_{ck}(t) = e^{-q\frac{||r_k-r_c||^p}{\sigma(t)^2}}$$
+
+Where the values of $p$ were  2 and 3, and the values of $q$ were 0.1,1 and 2.
+
+When comparing the 2 base functions, we tested different ranges of epochs: 60,80,100,150 and 200.
+
+We found that using a different neighbourhood function did not lead to a better result, however the graphs of the 
+mexican-hat function looks slightly worse, due to the fact that there are more clusters with elements in. This is a 
+weakness in the metric we picked in Question 1. 
+
+https://www.intechopen.com/chapters/69305
+
+
+## Question 4
+
 
 
 
@@ -51,4 +80,6 @@ some of them perform worse.
 
 [2]Mathematics Department, King Mongkut’s University of Technology Thonburi, Bangkok, Thailand, W. Natita, W. Wiboonsak, and S. Dusadee, ‘Appropriate Learning Rate and Neighborhood Function of Self-organizing Map (SOM) for Specific Humidity Pattern Classification over Southern Thailand’, IJMO, vol. 6, no. 1, pp. 61–65, 2016, doi: 10.7763/IJMO.2016.V6.504.
 
+[3] https://coursepages2.tuni.fi/tiets07/wp-content/uploads/sites/110/2019/01/Neurocomputing3.pdf
 
+[4] L. A. Tu, Improving Feature Map Quality of SOM Based on Adjusting the Neighborhood Function. IntechOpen, 2019. doi: 10.5772/intechopen.89233.
