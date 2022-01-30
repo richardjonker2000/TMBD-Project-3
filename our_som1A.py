@@ -51,7 +51,7 @@ class SOM:
     def initialize(self):
         self.net = np.random.random((self.network_dimensions[0], self.network_dimensions[1], self.num_features))
 
-    def train(self, data, num_epochs=100, init_learning_rate=0.01, resetWeights=False):
+    def train(self, data, learning_rate_funtion, num_epochs=100, init_learning_rate=0.01, resetWeights=False):
         """
         :param data: the data to be trained
         :param num_epochs: number of epochs (default: 100)
@@ -73,16 +73,16 @@ class SOM:
         for i in range(1, num_epochs + 1):
             # interpolate new values for α(t) and σ (t)
             radius = self.decay_radius(i)
-            learning_rate = self.decay_learning_rate(init_learning_rate, i, num_epochs)
+            learning_rate = self.decay_learning_rate(init_learning_rate, i, num_epochs, learning_rate_funtion)
             # visualization
-            vis_interval = int(num_epochs/10)
-            if i % vis_interval == 0:
-                if fig is not None:
-                    self.show_plot(fig, i/vis_interval, i)
-                print("SOM training epoches %d" % i)
-                print("neighborhood radius ", radius)
-                print("learning rate ", learning_rate)
-                print("-------------------------------------")
+            #vis_interval = int(num_epochs/10)
+            # if i % vis_interval == 0:
+            #     if fig is not None:
+            #         self.show_plot(fig, i/vis_interval, i)
+            #     print("SOM training epoches %d" % i)
+            #     print("neighborhood radius ", radius)
+            #     print("learning rate ", learning_rate)
+            #     print("-------------------------------------")
 
             # shuffling data
             np.random.shuffle(indices)
@@ -143,8 +143,16 @@ class SOM:
     def decay_radius(self, iteration):
         return self.init_radius * np.exp(-iteration / self.time_constant)#rk-rx^2
 
-    def decay_learning_rate(self, initial_learning_rate, iteration, num_iterations):
-        return initial_learning_rate * np.exp(-iteration / num_iterations)
+    def decay_learning_rate(self, initial_learning_rate, iteration, num_iterations, learning_rate_funtion):
+        if learning_rate_funtion == "default":
+            return initial_learning_rate * np.exp(-iteration / num_iterations)
+        elif learning_rate_funtion == "linear":
+            return initial_learning_rate*(1/iteration)
+        elif learning_rate_funtion == "inverse":
+            return initial_learning_rate*(1-1/num_iterations)
+        elif learning_rate_funtion == "power":
+            return initial_learning_rate*(1/num_iterations)
+
 
     def show_plot(self, fig, position, epoch):
         # setup axes
