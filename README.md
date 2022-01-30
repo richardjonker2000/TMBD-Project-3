@@ -45,7 +45,9 @@ some of them perform worse.
 http://www.cis.hut.fi/somtoolbox/documentation/somalg.shtml
 
 ## Question 3
-We interpreted the curve of deviation as the neighborhood function $h_{ck}(t)$. After investigating we found various 
+
+## Question 4
+We interpreted the normal distribution as the neighborhood function $h_{ck}(t)$. After investigating we found various 
 possible neighborhood functions namely gaussian(the default one), bubble[2], mexican-hat[3] and triangular neighborhood.
 We selected the mexican-hat neighborhood function as we were not able to understand how to implement the simple bubble 
 function. The mexican-hat function is defined as [3]:
@@ -69,7 +71,7 @@ weakness in the metric we picked in Question 1.
 https://www.intechopen.com/chapters/69305
 
 
-## Question 4
+
 
 
 
