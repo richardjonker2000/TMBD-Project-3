@@ -1,9 +1,9 @@
 # TMBD-Project-3
 
-## Question 1:
+## **Question 1:**
 
 For a metric in deciding whether a change in the algorithm provides an improvement or not, we decided that using an 
-accuracy function would be most appropriate. After investigating, we found the purity accuracy function[1]:
+accuracy function would be most appropriate. After investigating, we found the purity accuracy function [[1]](#1):
 
 $$Pur(Q,Y) = \frac{1}{N}\sum_{k=1}^K max_{j=1...c} |Q_k \cap Y_j |$$
 
@@ -13,9 +13,8 @@ dividing the correctly clustered items with the total number of clusters.
 
 We chose an external measurement as they are easier to interpreter than the internal metrics mentioned in the work.
 
-## Question 2:
-
-After investigating various learning rate functions suggested by W. Natita et. al.[2], we used the following learning 
+## **Question 2:**
+After investigating various learning rate functions suggested by W. Natita et. al. [[2]](#2), we used the following learning 
 rate functions in addition to the default function:
 
 $$ 1. \alpha(t) = \alpha(0) \times \frac{1}{t} $$
@@ -44,19 +43,17 @@ some of them perform worse.
 
 http://www.cis.hut.fi/somtoolbox/documentation/somalg.shtml
 
-## Question 3
-
+## **Question 3**
 We interpreted the curve of distribution as being the radius of the neighbourhood function. We investigated the use of 
 removing the decreasing radius function, and also providing a fixed decreasing radius value of 0.5. We were not able to 
 find substitutes to this function. all the tests were run with 40 epochs as this shows the best variation in the data. 
 It was interesting to note the fixed decreasing radius had better results in 60 epochs than the dynamic decreasing radius.
 Not changing the radius performed badly as expected.
 
-## Question 4
-We interpreted the normal distribution as the neighborhood function $h_{ck}(t)$. After investigating we found various 
-possible neighborhood functions namely gaussian(the default one), bubble[2], mexican-hat[3] and triangular neighborhood.
+## **Question 4**
+We interpreted the normal distribution as the neighborhood function $h_{ck}(t)$. After investigating we found various possible neighborhood functions namely gaussian(the default one), bubble [[2]](#2), mexican-hat [[3]](#3) and triangular neighborhood.
 We selected the mexican-hat neighborhood function as we were not able to understand how to implement the simple bubble 
-function. The mexican-hat function is defined as [3]:
+function. The mexican-hat function is defined as [[3]](#3):
 
 $$h_{ck}(t) =(1-2\frac{||r_k-r_c||^2}{\sigma(t)^2}) \times e^{-\frac{||r_k-r_c||^2}{\sigma(t)^2}}$$
 
@@ -76,18 +73,11 @@ weakness in the metric we picked in Question 1.
 
 https://www.intechopen.com/chapters/69305
 
+## **References**
+<a id=1>[1]</a> F. Forest, M. Lebbah, H. Azzag, and J. Lacaille, ‘A Survey and Implementation of Performance Metrics for Self-Organized Maps’, arXiv:2011.05847 [cs], Nov. 2020, Accessed: Jan. 30, 2022. [Online]. Available: http://arxiv.org/abs/2011.05847
 
+<a id=1>[2]</a> Mathematics Department, King Mongkut’s University of Technology Thonburi, Bangkok, Thailand, W. Natita, W. Wiboonsak, and S. Dusadee, ‘Appropriate Learning Rate and Neighborhood Function of Self-organizing Map (SOM) for Specific Humidity Pattern Classification over Southern Thailand’, IJMO, vol. 6, no. 1, pp. 61–65, 2016, doi: 10.7763/IJMO.2016.V6.504.
 
+<a id=1>[3]</a> https://coursepages2.tuni.fi/tiets07/wp-content/uploads/sites/110/2019/01/Neurocomputing3.pdf
 
-
-
-
-## References
-
-[1]F. Forest, M. Lebbah, H. Azzag, and J. Lacaille, ‘A Survey and Implementation of Performance Metrics for Self-Organized Maps’, arXiv:2011.05847 [cs], Nov. 2020, Accessed: Jan. 30, 2022. [Online]. Available: http://arxiv.org/abs/2011.05847
-
-[2]Mathematics Department, King Mongkut’s University of Technology Thonburi, Bangkok, Thailand, W. Natita, W. Wiboonsak, and S. Dusadee, ‘Appropriate Learning Rate and Neighborhood Function of Self-organizing Map (SOM) for Specific Humidity Pattern Classification over Southern Thailand’, IJMO, vol. 6, no. 1, pp. 61–65, 2016, doi: 10.7763/IJMO.2016.V6.504.
-
-[3] https://coursepages2.tuni.fi/tiets07/wp-content/uploads/sites/110/2019/01/Neurocomputing3.pdf
-
-[4] L. A. Tu, Improving Feature Map Quality of SOM Based on Adjusting the Neighborhood Function. IntechOpen, 2019. doi: 10.5772/intechopen.89233.
+<a id=1>[4]</a> L. A. Tu, Improving Feature Map Quality of SOM Based on Adjusting the Neighborhood Function. IntechOpen, 2019. doi: 10.5772/intechopen.89233.
