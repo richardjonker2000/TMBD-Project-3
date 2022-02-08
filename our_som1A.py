@@ -51,11 +51,12 @@ class SOM:
     def initialize(self):
         self.net = np.random.random((self.network_dimensions[0], self.network_dimensions[1], self.num_features))
 
-    def train(self, data, learning_rate_funtion, num_epochs=100, init_learning_rate=0.01, resetWeights=False):
+    def train(self, data, learning_rate_funtion, num_epochs=100, init_learning_rate=0.01, resetWeights=False, show_plot=False):
         """
         :param data: the data to be trained
         :param num_epochs: number of epochs (default: 100)
         :param init_learning_rate: initial learning rate (default: 0.01)
+        :param show_plot: whether to show SOM grid or not. Introduced for efficiency
         :return:
         """
         if resetWeights:
@@ -65,7 +66,7 @@ class SOM:
         self.time_constant = num_epochs / np.log(self.init_radius)
 
         # visualization
-        if self.num_features == 3:
+        if show_plot:
             fig = plt.figure()
         else:
             fig = None
