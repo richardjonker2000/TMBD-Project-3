@@ -51,11 +51,14 @@ class SOM:
     def initialize(self):
         self.net = np.random.random((self.network_dimensions[0], self.network_dimensions[1], self.num_features))
 
-    def train(self, data,function, num_epochs=100, init_learning_rate=0.01, resetWeights=False):
+    def train(self, data, lr_decay_function, radius_decay_function, num_epochs=100, init_learning_rate=0.01, resetWeights=False, show_plot=False):
         """
         :param data: the data to be trained
         :param num_epochs: number of epochs (default: 100)
-        :param init_learning_rate: initial learning rate (default: 0.01)
+        :param init_learning_rate: base/initial learning rate (default: 0.01)
+        :param lr_decay_function: function used to decay/reduce learning rate (default: normal)
+        :param radius_decay_function: function used to decay/reduce radius (default: half each time)
+        :param show_plot: whether to show SOM grid or not. Introduced for efficiency
         :return:
         """
         if resetWeights:
@@ -65,17 +68,17 @@ class SOM:
         self.time_constant = num_epochs / np.log(self.init_radius)
 
         # visualization
-        if self.num_features == 3:
+        if show_plot:
             fig = plt.figure()
         else:
             fig = None
         # for (epoch = 1,..., Nepochs)
         for i in range(1, num_epochs + 1):
             # interpolate new values for α(t) and σ (t)
-            radius = self.decay_radius(i, function)
-            learning_rate = self.decay_learning_rate(init_learning_rate, i, num_epochs)
+            radius = self.decay_radius(iteration=i, deviation_curve=radius_decay_function)
+            learning_rate = self.decay_learning_rate(init_learning_rate, i, num_epochs, lr_decay_function)
             # visualization
-            vis_interval = int(num_epochs/10)
+            #vis_interval = int(num_epochs/10)
             # if i % vis_interval == 0:
             #     if fig is not None:
             #         self.show_plot(fig, i/vis_interval, i)
@@ -83,8 +86,8 @@ class SOM:
             #     print("neighborhood radius ", radius)
             #     print("learning rate ", learning_rate)
             #     print("-------------------------------------")
-            #
-            # # shuffling data
+
+            # shuffling data
             np.random.shuffle(indices)
 
             # for (record = 1,..., Nrecords)
@@ -113,9 +116,13 @@ class SOM:
 
     def find_bmu(self, row_t):
         """
-            Find the best matching unit for a given vector, row_t, in the SOM
-            Returns: a (bmu, bmu_idx) tuple where bmu is the high-dimensional Best Matching Unit
-                     and bmu_idx is the index of this vector in the SOM
+        Competition Stage
+        Find the best matching unit for a given vector, row_t, in the SOM
+        
+        Returns:
+            bmu, bmu_idx (tuple):
+                bmu     - the high-dimensional Best Matching Unit
+                bmu_idx - is the index of this vector in the SOM
         """
         bmu_idx = np.array([0, 0])
         # set the initial minimum distance to a huge number
@@ -136,20 +143,59 @@ class SOM:
         return bmu, bmu_idx
 
     def predict(self, data):
-        # find its Best Matching Unit
+        """
+        finds the best matching using of the given data matrix.
+
+        Args:
+            data (nd.array): matrix of samples to cluster.
+
+        Returns:
+            bmu, bmu_ids:
+                bmu     - weights associated with the best matching neuron/cluster for each sample.
+                bmu_idx - positions of best matching neuron in the grid.
+        """
         bmu, bmu_idx = self.find_bmu(data)
         return bmu, bmu_idx
 
-    def decay_radius(self, iteration, function):
-        if function == "none":
-            return self.init_radius
-        elif function == "dynamic":
-            return self.init_radius * np.exp(-iteration / self.time_constant)
-        elif function == "fixed":
-            return self.init_radius * 0.5
+    def decay_radius(self, iteration, deviation_curve):
+        """
+        reduce neighbourhood radius for each iteration via given decay_curve
 
-    def decay_learning_rate(self, initial_learning_rate, iteration, num_iterations):
+        Args:
+            iteration (int): current iteration
+            decay_curve (str): decay curve to use for the reduction. could be ['eponential', 'linear', 'fixed']
+
+        Returns:
+            float: the computed radius for current iteration
+        """
+        if deviation_curve == "exponential":  # exponential decay
+            return self.init_radius * np.exp(-iteration / self.time_constant)
+        elif deviation_curve == "linear":  # linear decay
+            return self.init_radius * 0.5
+        return self.init_radius # fixed radius
+
+    def decay_learning_rate(self, initial_learning_rate, iteration, num_iterations, lr_decay_function):
+        """reduce learning rate wrt the decay function
+
+        Args:
+            initial_learning_rate (float): base learning rate
+            iteration (int): current iteration
+            num_iterations (int): total number of epochs
+            lr_decay_function (str): the function used to deacay lr
+
+        Returns:
+            float: computed learning rate
+        """
+        if lr_decay_function == "linear":
+            return initial_learning_rate*(1/iteration)
+        elif lr_decay_function == "inverse":
+            return initial_learning_rate*(1-1/num_iterations)
+        elif lr_decay_function == "power":
+            return initial_learning_rate*(1/num_iterations)
+        # for default or any other underfined lr decay function
         return initial_learning_rate * np.exp(-iteration / num_iterations)
+
+
 
     def show_plot(self, fig, position, epoch):
         # setup axes
