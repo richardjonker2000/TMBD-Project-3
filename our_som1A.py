@@ -123,23 +123,11 @@ class SOM:
                 bmu     - the high-dimensional Best Matching Unit
                 bmu_idx - is the index of this vector in the SOM
         """
-        bmu_idx = np.array([0, 0])
-        # set the initial minimum distance to a huge number
-        min_dist = np.iinfo(np.int).max
-        # calculate the high-dimensional distance between each neuron and the input
-        # for (k = 1,..., K)
-        for x in range(self.network_dimensions[0]):
-            for y in range(self.network_dimensions[1]):
-                weight_k = self.net[x, y, :].reshape(1, self.num_features)
-                # compute distances dk using Eq. (1)
-                sq_dist = np.sum((weight_k - row_t) ** 2)
-                # compute winning node c using Eq. (2)
-                if sq_dist < min_dist:
-                    min_dist = sq_dist
-                    bmu_idx = np.array([x, y])
-        # get vector corresponding to bmu_idx
-        bmu = self.net[bmu_idx[0], bmu_idx[1], :].reshape(1, self.num_features)
-        return bmu, bmu_idx
+        distances = np.sum((self.net - row_t)**2, axis=2)  # compute the euclidean distance of sample from each neuron
+        bmu_idx = np.unravel_index(np.argmin(distances, axis=None), distances.shape)  # fetch minimum distanced neuron
+        bmu_weight = self.net[bmu_idx]  # get BMU neuron's corresponding weights
+        return bmu_weight, np.array(bmu_idx)
+
 
     def predict(self, data):
         """
@@ -174,12 +162,11 @@ class SOM:
         if lr_decay_function == "linear":
             return initial_learning_rate*(1/iteration)
         elif lr_decay_function == "inverse":
-            return initial_learning_rate*(1-1/num_iterations)
+            return initial_learning_rate*(1-iteration/num_iterations)
         elif lr_decay_function == "power":
-            return initial_learning_rate*(1/num_iterations)
-        # for default or any other underfined lr decay function
-        return initial_learning_rate * np.exp(-iteration / num_iterations)
-
+            return initial_learning_rate * np.exp(-iteration / num_iterations)
+        # for default or undefined
+        return initial_learning_rate * np.exp(iteration / num_iterations)
 
     def show_plot(self, fig, position, epoch):
         # setup axes

@@ -51,6 +51,14 @@ class SOM:
     def initialize(self):
         self.net = np.random.random((self.network_dimensions[0], self.network_dimensions[1], self.num_features))
 
+    def set_weights(self, weights):
+        """sets the weight for a given experiment
+
+        Args:
+            weights (np.ndarray): network weights to be used for computation
+        """
+        self.net = weights
+
     def train(self, data, lr_decay_function, radius_decay_function, num_epochs=100, init_learning_rate=0.01, resetWeights=False, show_plot=False):
         """
         :param data: the data to be trained
@@ -175,7 +183,8 @@ class SOM:
         return self.init_radius # fixed radius
 
     def decay_learning_rate(self, initial_learning_rate, iteration, num_iterations, lr_decay_function):
-        """reduce learning rate wrt the decay function
+        """
+        reduce learning rate wrt the decay function
 
         Args:
             initial_learning_rate (float): base learning rate
@@ -189,13 +198,11 @@ class SOM:
         if lr_decay_function == "linear":
             return initial_learning_rate*(1/iteration)
         elif lr_decay_function == "inverse":
-            return initial_learning_rate*(1-1/num_iterations)
+            return initial_learning_rate*(1-iteration/num_iterations)
         elif lr_decay_function == "power":
-            return initial_learning_rate*(1/num_iterations)
-        # for default or any other underfined lr decay function
-        return initial_learning_rate * np.exp(-iteration / num_iterations)
-
-
+            return initial_learning_rate * np.exp(-iteration / num_iterations)
+        # for default or undefined
+        return initial_learning_rate * np.exp(iteration / num_iterations)
 
     def show_plot(self, fig, position, epoch):
         # setup axes
