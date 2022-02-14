@@ -51,7 +51,17 @@ class SOM:
     def initialize(self):
         self.net = np.random.random((self.network_dimensions[0], self.network_dimensions[1], self.num_features))
 
-    def train(self, data, lr_decay_function, num_epochs=100, init_learning_rate=0.01, resetWeights=False, show_plot=False):
+    def set_weights(self, weights):
+        self.net = weights
+
+    def train(self, data, lr_decay_function, num_epochs=1, init_learning_rate=0.01, resetWeights=False, show_plot=False, method='euler'):
+        if method == 'runge-kutta':
+           self.runge_kutta(data, lr_decay_function, num_epochs, init_learning_rate, resetWeights=False, show_plot=False)
+        else:
+            self.euler_method(data, lr_decay_function, num_epochs, init_learning_rate, resetWeights=False, show_plot=False)
+
+
+    def euler_method(self, data, lr_decay_function, num_epochs=100, init_learning_rate=0.01, resetWeights=False, show_plot=False):
         """
         :param data: the data to be trained
         :param num_epochs: number of epochs (default: 100)
@@ -66,11 +76,14 @@ class SOM:
         indices = np.arange(num_rows)
         self.time_constant = num_epochs / np.log(self.init_radius)
 
+        self.approx_net =self.net.copy()
+
         # visualization
         if show_plot:
             fig = plt.figure()
         else:
             fig = None
+
         # for (epoch = 1,..., Nepochs)
         for i in range(1, num_epochs + 1):
             # interpolate new values for α(t) and σ (t)
@@ -85,7 +98,7 @@ class SOM:
             #     print("neighborhood radius ", radius)
             #     print("learning rate ", learning_rate)
             #     print("-------------------------------------")
-
+            
             # shuffling data
             np.random.shuffle(indices)
 
@@ -95,22 +108,33 @@ class SOM:
 
                 # find its Best Matching Unit
                 bmu, bmu_idx = self.find_bmu(row_t)
+                bmu_ea, bmu_idx_ea = self.find_bmu(row_t, self.approx_net)  # for euler approximation
+
                 # for (k = 1,..., K)
                 for x in range(self.network_dimensions[0]):
                     for y in range(self.network_dimensions[1]):
                         weight = self.net[x, y, :].reshape(1, self.num_features)
                         w_dist = np.sum((np.array([x, y]) - bmu_idx) ** 2)
+                        
                         # if the distance is within the current neighbourhood radius
                         if w_dist <= radius ** 2:
                             # update weight vectors wk using Eq. (3)
                             influence = SOM.calculate_influence(w_dist, radius)
                             new_w = weight + (learning_rate * influence * (row_t - weight))
                             self.net[x, y, :] = new_w.reshape(1, self.num_features)
+
+                        # weight-update using euler approximation function 
+                        weight_approx = self.approx_net[x, y, :].reshape(1, self.num_features)
+                        w_dist_approx = np.sum((np.array([x, y]) - bmu_idx_ea) ** 2)
+                        if w_dist_approx <= radius ** 2:
+                            w0 = self.approx_net[x, y, :].reshape(1, self.num_features)
+                            dw = (w0 + w0*x)/(1+x)
+                            self.approx_net[x, y, :] = dw
+
         if fig is not None:
             plt.show()
 
-
-    def train_runge_kutta(self, data, lr_decay_function, num_epochs=100, init_learning_rate=0.01, resetWeights=False, show_plot=False):
+    def runge_kutta(self, data, lr_decay_function, num_epochs=1, init_learning_rate=0.01, resetWeights=False, show_plot=False):
         """
         :param data: the data to be trained
         :param num_epochs: number of epochs (default: 100)
@@ -130,6 +154,9 @@ class SOM:
             fig = plt.figure()
         else:
             fig = None
+
+        self.approx_net = self.net.copy()
+
         # for (epoch = 1,..., Nepochs)
         for i in range(1, num_epochs + 1):
             # interpolate new values for α(t) and σ (t)
@@ -154,6 +181,8 @@ class SOM:
 
                 # find its Best Matching Unit
                 bmu, bmu_idx = self.find_bmu(row_t)
+                bmu_ra, bmu_idx_ra = self.find_bmu(row_t, weights=self.approx_net)  # runge-kutta approximation
+
                 # for (k = 1,..., K)
                 for x in range(self.network_dimensions[0]):
                     for y in range(self.network_dimensions[1]):
@@ -163,29 +192,29 @@ class SOM:
                         if w_dist <= radius ** 2:
                             influence = SOM.calculate_influence(w_dist, radius)
 
-                            # update weight vectors wk using Eq. (3) - euler method
-                            # new_w = weight + (learning_rate * influence * (row_t - weight))
-                            # self.net[x, y, :] = new_w.reshape(1, self.num_features)
-
-                            # https://www.quora.com/Whats-the-difference-between-the-Runge-Kutta-method-and-Eulers-modified-method-for-solving-an-ordinary-differential-equation
-                            # y1 = yo + k2 where k2 = h f [ xo + h/2 , yo + h/2 f (xo , yo) ]
-                            # k1 = h f (xo , yo) . So k2 now becomes k2 = h f [ xo + h/2 , yo + k1/2 ]
-                            # So y1 = y0 + h f [ xo + h/2 , yo + k1 / 2] eqn (2)
-
                             # update weight vectors wk using Eq. (3) - runge-kutta method order 4
-                            step = learning_rate * influence
+                            step = influence
                             k1 = step * (row_t - weight)  # f(x0,y0) = hf(x0,y0)
-                            new_w = weight + step * (row_t+(step/2) - weight+(k1/2)) # y_n+1 = yn + h f [ xo + h/2 , yn + k1 / 2] eqn (2)
+                            k2 = (row_t+step/2 - weight+k1/2)  # h f [ xo + h/2 , yn + k1 / 2] eqn (2)
+                            new_w = weight + learning_rate * step * k2  # y_n+1 = yn + k2
                             self.net[x, y, :] = new_w.reshape(1, self.num_features)
+
+                        # weight-update using rk approximation function 
+                        weight_approx = self.approx_net[x, y, :].reshape(1, self.num_features)
+                        w_dist_approx = np.sum((np.array([x, y]) - bmu_idx_ra) ** 2)
+                        if w_dist_approx <= radius ** 2:
+                            w0 = self.approx_net[x, y, :].reshape(1, self.num_features)
+                            dw = (w0 + w0*x)/(1+x)
+                            self.approx_net[x, y, :] = dw.reshape(1, self.num_features)
+                    
         if fig is not None:
-            plt.show()
-    
+            plt.show()    
 
     @staticmethod
     def calculate_influence(distance, radius): #distribution
         return np.exp(-distance / (2 * (radius ** 2)))#SD - 2 * r**2
 
-    def find_bmu(self, row_t):
+    def find_bmu(self, row_t, weights=None):
         """
         Competition Stage
         Find the best matching unit for a given vector, row_t, in the SOM
@@ -195,9 +224,11 @@ class SOM:
                 bmu     - the high-dimensional Best Matching Unit
                 bmu_idx - is the index of this vector in the SOM
         """
-        distances = np.sum((self.net - row_t)**2, axis=2)  # compute the euclidean distance of sample from each neuron
+        if weights is None:
+            weights = self.net
+        distances = np.sum((weights - row_t)**2, axis=2)  # compute the euclidean distance of sample from each neuron
         bmu_idx = np.unravel_index(np.argmin(distances, axis=None), distances.shape)  # fetch minimum distanced neuron
-        bmu_weight = self.net[bmu_idx]  # get BMU neuron's corresponding weights
+        bmu_weight = weights[bmu_idx]  # get BMU neuron's corresponding weights
         return bmu_weight, np.array(bmu_idx)
 
 
