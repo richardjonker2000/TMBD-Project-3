@@ -80,8 +80,6 @@ class SOM:
             fig = plt.figure()
         else:
             fig = None
-        
-        network_grid = self.net.copy()
 
         for i in range(1, num_epochs + 1):
             
@@ -111,7 +109,7 @@ class SOM:
                 # for (k = 1,..., K)
                 for x in range(self.network_dimensions[0]):
                     for y in range(self.network_dimensions[1]):
-                        weight = network_grid[x, y, :].reshape(1, self.num_features)
+                        weight = self.net[x, y, :].reshape(1, self.num_features)
                         w_dist = np.sum((np.array([x, y]) - bmu_idx) ** 2)
 
                         # if the distance is within the current neighbourhood radius
@@ -120,12 +118,10 @@ class SOM:
                             influence = SOM.calculate_influence(w_dist, radius, function=influence_function, pq=pq)
                             
                             new_w = weight + (learning_rate * influence * (row_t - weight))
-                            network_grid[x, y, :] = new_w.reshape(1, self.num_features)
+                            self.net[x, y, :] = new_w.reshape(1, self.num_features)
 
         if fig is not None:
             plt.show()
-        
-        self.net = network_grid
 
 
     def train_p(self, data, pq=(2,1), num_epochs=1, init_learning_rate=0.01, lr_decay_function='default', radius_decay_function='fixed', influence_function='gaussian', resetWeights=False, show_plot=False):

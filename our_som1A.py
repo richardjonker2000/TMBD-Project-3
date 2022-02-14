@@ -109,6 +109,78 @@ class SOM:
         if fig is not None:
             plt.show()
 
+
+    def train_runge_kutta(self, data, lr_decay_function, num_epochs=100, init_learning_rate=0.01, resetWeights=False, show_plot=False):
+        """
+        :param data: the data to be trained
+        :param num_epochs: number of epochs (default: 100)
+        :param init_learning_rate: initial learning rate (default: 0.01)
+        :param lr_decay_function: function used to decay/reduce learning rate (default: normal)
+        :param show_plot: whether to show SOM grid or not. Introduced for efficiency
+        :return:
+        """
+        if resetWeights:
+            self.initialize()
+        num_rows = data.shape[0]
+        indices = np.arange(num_rows)
+        self.time_constant = num_epochs / np.log(self.init_radius)
+
+        # visualization
+        if show_plot:
+            fig = plt.figure()
+        else:
+            fig = None
+        # for (epoch = 1,..., Nepochs)
+        for i in range(1, num_epochs + 1):
+            # interpolate new values for α(t) and σ (t)
+            radius = self.decay_radius(i)
+            learning_rate = self.decay_learning_rate(init_learning_rate, i, num_epochs, lr_decay_function)
+            # visualization
+            #vis_interval = int(num_epochs/10)
+            # if i % vis_interval == 0:
+            #     if fig is not None:
+            #         self.show_plot(fig, i/vis_interval, i)
+            #     print("SOM training epoches %d" % i)
+            #     print("neighborhood radius ", radius)
+            #     print("learning rate ", learning_rate)
+            #     print("-------------------------------------")
+
+            # shuffling data
+            np.random.shuffle(indices)
+
+            # for (record = 1,..., Nrecords)
+            for record in indices:
+                row_t = data[record, :]
+
+                # find its Best Matching Unit
+                bmu, bmu_idx = self.find_bmu(row_t)
+                # for (k = 1,..., K)
+                for x in range(self.network_dimensions[0]):
+                    for y in range(self.network_dimensions[1]):
+                        weight = self.net[x, y, :].reshape(1, self.num_features)
+                        w_dist = np.sum((np.array([x, y]) - bmu_idx) ** 2)
+                        # if the distance is within the current neighbourhood radius
+                        if w_dist <= radius ** 2:
+                            influence = SOM.calculate_influence(w_dist, radius)
+
+                            # update weight vectors wk using Eq. (3) - euler method
+                            # new_w = weight + (learning_rate * influence * (row_t - weight))
+                            # self.net[x, y, :] = new_w.reshape(1, self.num_features)
+
+                            # https://www.quora.com/Whats-the-difference-between-the-Runge-Kutta-method-and-Eulers-modified-method-for-solving-an-ordinary-differential-equation
+                            # y1 = yo + k2 where k2 = h f [ xo + h/2 , yo + h/2 f (xo , yo) ]
+                            # k1 = h f (xo , yo) . So k2 now becomes k2 = h f [ xo + h/2 , yo + k1/2 ]
+                            # So y1 = y0 + h f [ xo + h/2 , yo + k1 / 2] eqn (2)
+
+                            # update weight vectors wk using Eq. (3) - runge-kutta method order 4
+                            step = learning_rate * influence
+                            k1 = step * (row_t - weight)  # f(x0,y0) = hf(x0,y0)
+                            new_w = weight + step * (row_t+(step/2) - weight+(k1/2)) # y_n+1 = yn + h f [ xo + h/2 , yn + k1 / 2] eqn (2)
+                            self.net[x, y, :] = new_w.reshape(1, self.num_features)
+        if fig is not None:
+            plt.show()
+    
+
     @staticmethod
     def calculate_influence(distance, radius): #distribution
         return np.exp(-distance / (2 * (radius ** 2)))#SD - 2 * r**2
