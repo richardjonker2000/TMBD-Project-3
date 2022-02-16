@@ -128,10 +128,10 @@ We realized that, upon comparing the runge-kutta second order method with the im
 
 Just as the absolute errors for the euler method, the errors for the Runge-Kutta approximation is also presented in '()' beside the purity accuracy. These errors in general tend to be much smaller than those recorded from the Euler approach. In general, these errors decreased with smaller learning rates except very small learning rate with initial value 0.001.
 ## **Question 9**
-
 - The Runge-Kutta approximation was very efficient in clustering the datapoints as compared to the Euler's approach as seen in the presented results. 
 - Learning rates decay functions which seemed to be very effective were the power functions with learning rates 0.1 and 0.01 outperforming the others, with steady improvements for larger epochs. With very small initial learning rate of 0.001, we realized unexpected accuracies and corresponding higher error rate across all epochs considered. 
 - For a more improved clustering, we infer that, keeping the neighbourhood radius below one (1) has significant impact on ensuring convergence of our optimization. Though at some specific parameters the Euler method performed well, we recommend the Runge-Kutta method for a more improved optimization.
+
 ## **References**
 <a id=1>[1]</a> F. Forest, M. Lebbah, H. Azzag, and J. Lacaille, ‘A Survey and Implementation of Performance Metrics for Self-Organized Maps’, arXiv:2011.05847 [cs], Nov. 2020, Accessed: Jan. 30, 2022. [Online]. Available: http://arxiv.org/abs/2011.05847
 
