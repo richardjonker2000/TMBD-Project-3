@@ -49,7 +49,7 @@ class SOM:
         self.initialize()
 
     def initialize(self):
-        """sets up new grid of network grid weights for optimization.
+        """sets up new grid of network weights for optimization.
         """
         self.net = np.random.random((self.network_dimensions[0], self.network_dimensions[1], self.num_features))
 
@@ -102,7 +102,6 @@ class SOM:
         num_rows = self.data.shape[0]
         indices = np.arange(num_rows)
         self.time_constant = self.num_epochs/np.log(self.init_radius)
-        self.approx_net = self.net.copy()  # w0 for approximation
 
         # visualization
         if self.show_plot:
@@ -134,7 +133,6 @@ class SOM:
 
                 # find its Best Matching Unit
                 bmu, bmu_idx = self.find_bmu(row_t)
-                bmu_ea, bmu_idx_ea = self.find_bmu(row_t, self.approx_net)  # for euler approximation
 
                 # for (k = 1,..., K)
                 for x in range(self.network_dimensions[0]):
@@ -149,14 +147,6 @@ class SOM:
                             influence = SOM.calculate_influence(w_dist, radius)
                             new_w = weight + (learning_rate * influence * (row_t - weight))
                             self.net[x, y, :] = new_w.reshape(1, self.num_features)
-
-                        # weight-update using euler approximation function 
-                        weight_approx = self.approx_net[x, y, :].reshape(1, self.num_features)
-                        w_dist_approx = np.sum((np.array([x, y]) - bmu_idx_ea) ** 2)
-                        if w_dist_approx <= radius ** 2:
-                            w0 = self.approx_net[x, y, :].reshape(1, self.num_features)
-                            dw = (w0 + w0*x)/(1+x)
-                            self.approx_net[x, y, :] = dw
 
         if fig is not None:
             plt.show()
@@ -177,7 +167,6 @@ class SOM:
         num_rows = self.data.shape[0]
         indices = np.arange(num_rows)
         self.time_constant = self.num_epochs / np.log(self.init_radius)
-        self.approx_net =self.net.copy()  # w0 for approximation
 
         # visualization
         if self.show_plot:
@@ -209,7 +198,6 @@ class SOM:
 
                 # find its Best Matching Unit
                 bmu, bmu_idx = self.find_bmu(row_t)
-                bmu_ra, bmu_idx_ra = self.find_bmu(row_t, weights=self.approx_net)  # runge-kutta approximation
 
                 # for (k = 1,..., K)
                 for x in range(self.network_dimensions[0]):
@@ -221,18 +209,11 @@ class SOM:
                         if w_dist <= radius ** 2: # if the distance is within the current neighbourhood radius
                             influence = SOM.calculate_influence(w_dist, radius)
                             # update weight vectors wk using runge-kutta equation of order 4
-                            k1 = influence * (row_t - weight)  # f(x0,y0) = hf(x0,y0)
-                            k2 = (row_t+influence/2 - weight+k1/2)  # h f [ xo + h/2 , yn + k1 / 2] eqn (2)
-                            new_w = weight + learning_rate * influence * k2  # y_n+1 = yn + h*k2
+                            step = influence/2
+                            k1 = step * (row_t - weight)  # f(x0,y0) = f(x0,y0)
+                            k2 = (row_t+(step/2) - weight+k1/2)  # h f [ xo + h/2 , yn + k1 / 2] eqn (2)
+                            new_w = weight + learning_rate * step * (k1 + k2)  # y_n+1 = yn + h/4*(k1+3k2)
                             self.net[x, y, :] = new_w.reshape(1, self.num_features)
-
-                        # weight-update using rk approximation function 
-                        weight_approx = self.approx_net[x, y, :].reshape(1, self.num_features)
-                        w_dist_approx = np.sum((np.array([x, y]) - bmu_idx_ra) ** 2)
-                        if w_dist_approx <= radius ** 2:
-                            w0 = self.approx_net[x, y, :].reshape(1, self.num_features)
-                            dw = (w0 + w0*x)/(1+x)
-                            self.approx_net[x, y, :] = dw.reshape(1, self.num_features)
 
         if fig is not None:
             plt.show()    
