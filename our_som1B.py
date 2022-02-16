@@ -135,7 +135,7 @@ class SOM:
 
                 # find its Best Matching Unit
                 bmu, bmu_idx = self.find_bmu(row_t)
-                bmu_ea, bmu_idx_ea = self.find_bmu(row_t, self.approx_net)  # for euler approximation
+                # bmu_ea, bmu_idx_ea = self.find_bmu(row_t, self.approx_net)  # for euler approximation
 
                 # for (k = 1,..., K)
                 for x in range(self.network_dimensions[0]):
@@ -151,13 +151,13 @@ class SOM:
                             new_w = weight + (learning_rate * influence * (row_t - weight))
                             self.net[x, y, :] = new_w.reshape(1, self.num_features)
 
-                        # # weight-update using euler approximation function 
+                        # # # weight-update using euler approximation function 
                         # weight_approx = self.approx_net[x, y, :].reshape(1, self.num_features)
                         # w_dist_approx = np.sum((np.array([x, y]) - bmu_idx_ea) ** 2)
                         # if w_dist_approx <= radius ** 2:
                         #     influence = SOM.calculate_influence(w_dist_approx, radius)
                         #     w0 = self.approx_net[x, y, :].reshape(1, self.num_features)
-                        #     dw = w0 + learning_rate * influence * (row_t - w0)
+                        #     dw = w0 + influence * (row_t - w0)
                         #     self.approx_net[x, y, :] = dw
 
         if fig is not None:
