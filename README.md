@@ -1,10 +1,10 @@
 # TMBD-Project-3
 
 ### **Members**
-- Ana...
+- Ana GONÇALVES (89970)
 - Prosper Ablordeppey (106382)
 - Richrd Jonker (109560)
-- Tiago ...
+- Tiago Silva (49615)
 ## **Question 1:** <a id=Q1></a> 
 
 For a metric in deciding whether a change in the algorithm provides an improvement or not, we decided that using an 
