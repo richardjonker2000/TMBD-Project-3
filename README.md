@@ -1,10 +1,11 @@
 # TMBD-Project-3
 
 ### **Members**
-- Ana GONÇALVES (89970)
+- Ana Goncalves (89970)
 - Prosper Ablordeppey (106382)
 - Richrd Jonker (109560)
 - Tiago Silva (49615)
+  
 ## **Question 1:** <a id=Q1></a> 
 
 For a metric in deciding whether a change in the algorithm provides an improvement or not, we decided that using an 
@@ -127,6 +128,7 @@ We realized that, upon comparing the runge-kutta second order method with the im
 ## **Question 8**
 
 Just as the absolute errors for the euler method, the errors for the Runge-Kutta approximation is also presented in '()' beside the purity accuracy. These errors in general tend to be much smaller than those recorded from the Euler approach. In general, these errors decreased with smaller learning rates except very small learning rate with initial value 0.001.
+
 ## **Question 9**
 - The Runge-Kutta approximation was very efficient in clustering the datapoints as compared to the Euler's approach as seen in the presented results. 
 - Learning rates decay functions which seemed to be very effective were the power functions with learning rates 0.1 and 0.01 outperforming the others, with steady improvements for larger epochs. With very small initial learning rate of 0.001, we realized unexpected accuracies and corresponding higher error rate across all epochs considered. 
